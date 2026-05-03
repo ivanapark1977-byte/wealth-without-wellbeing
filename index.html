@@ -747,6 +747,11 @@
 
     <p>The defining puzzle of Gulf governance is the near-total failure to convert extraordinary natural resource wealth into citizen wellbeing. The four GCC states in this dataset — Qatar, UAE, Saudi Arabia, and Kuwait — between them hold among the world's largest sovereign wealth funds and some of the highest per-capita incomes on earth. By virtually every human welfare metric analysed here, they perform at the level of countries with a fraction of their income.</p>
 
+    <div style="margin: 3rem 0;">
+      <canvas id="happinessGdpChart" width="800" height="500" style="max-width: 100%;"></canvas>
+      <p style="font-size: 0.75rem; color: var(--ink-faint); margin-top: 0.5rem; font-style: italic;">Figure 1. Happiness score vs GDP per capita (USD PPP). Gulf states (pink) cluster in the lower right — high wealth, middling happiness — while Nordic countries (green) dominate the upper portion. Source: WHR 2024; World Bank 2023.</p>
+    </div>
+
     <div class="table-wrap">
       <div class="table-caption">Table 2 — The Gulf Gap: Key metrics comparison</div>
       <table>
@@ -915,6 +920,11 @@
 
     <h2 class="subsection">The Democracy Premium</h2>
     <p>The most powerful finding of this analysis emerges when the composite wellbeing ranking is colour-coded by government type using the Economist Intelligence Unit Democracy Index 2023. Social democracies occupy every top position; authoritarian monarchies occupy every bottom position. Liberal and flawed democracies fill the middle. The pattern holds without exception across all 28 countries.</p>
+
+    <div style="margin: 3rem 0;">
+      <canvas id="compositeRankingChart" width="800" height="900" style="max-width: 100%;"></canvas>
+      <p style="font-size: 0.75rem; color: var(--ink-faint); margin-top: 0.5rem; font-style: italic;">Figure 4. GDP-adjusted composite wellbeing ranking for all 28 countries, colour-coded by government type (EIU Democracy Index 2023). Social democracies (green) dominate the top; authoritarian monarchies (pink) occupy the bottom. Bars show standard deviation residuals from GDP prediction.</p>
+    </div>
 
     <div class="table-wrap">
       <div class="table-caption">Table 3 — Government type and wellbeing performance</div>
@@ -1231,6 +1241,326 @@
   <p>Independent investigative journalism. <a href="https://ivanapark1.substack.com">Subscribe on Substack</a>.</p>
   <p style="margin-top: 0.75rem; font-size: 0.72rem; opacity: 0.6;">Scope: 28 high-income countries · Metrics: 10 composite indicators · Method: GDP-adjusted percentile residuals · Data: 2022–2024. © The Anglophone Blind Spot, 2026.</p>
 </footer>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     CHARTS
+     ══════════════════════════════════════════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// Chart color palette matching template
+const colors = {
+  nordic: '#2D6A1F',      // green
+  nordicLight: '#eaf3e6',
+  gulf: '#A32D2D',        // red/pink
+  gulfLight: '#f9e8e8',
+  namerica: '#854F0B',    // amber
+  eastasia: '#3d3d38',    // ink-mid
+  weurope: '#6b6b62',     // ink-light
+  
+  // Government types
+  socialDem: '#2D6A1F',
+  liberalDem: '#4A90E2',
+  flawedDem: '#9B59B6',
+  hybrid: '#E67E22',
+  authoritarian: '#A32D2D',
+  oneParty: '#8B0000'
+};
+
+// ============================================================================
+// CHART 1: Happiness vs GDP per capita (Section 3)
+// ============================================================================
+const happinessData = [
+  // Nordic/N.Europe (green)
+  {x: 54, y: 7.74, label: 'Finland', color: colors.nordic, region: 'nordic'},
+  {x: 68, y: 7.58, label: 'Denmark', color: colors.nordic, region: 'nordic'},
+  {x: 82, y: 7.22, label: 'Norway', color: colors.nordic, region: 'nordic'},
+  {x: 60, y: 7.51, label: 'Iceland', color: colors.nordic, region: 'nordic'},
+  {x: 56, y: 7.44, label: 'Sweden', color: colors.nordic, region: 'nordic'},
+  {x: 66, y: 7.09, label: 'Netherlands', color: colors.nordic, region: 'nordic'},
+  {x: 72, y: 7.19, label: 'Switzerland', color: colors.nordic, region: 'nordic'},
+  
+  // W.Europe/Oceania (ink-light)
+  {x: 56, y: 6.91, label: 'New Zealand', color: colors.weurope, region: 'weurope'},
+  {x: 53, y: 6.96, label: 'Austria', color: colors.weurope, region: 'weurope'},
+  {x: 58, y: 6.85, label: 'Germany', color: colors.weurope, region: 'weurope'},
+  {x: 64, y: 6.96, label: 'Ireland', color: colors.weurope, region: 'weurope'},
+  {x: 59, y: 6.74, label: 'Belgium', color: colors.weurope, region: 'weurope'},
+  {x: 58, y: 6.79, label: 'UK', color: colors.weurope, region: 'weurope'},
+  {x: 56, y: 6.68, label: 'France', color: colors.weurope, region: 'weurope'},
+  {x: 60, y: 6.67, label: 'Australia', color: colors.weurope, region: 'weurope'},
+  {x: 38, y: 6.70, label: 'Spain', color: colors.weurope, region: 'weurope'},
+  {x: 44, y: 6.51, label: 'Italy', color: colors.weurope, region: 'weurope'},
+  
+  // N.America/UK (amber)
+  {x: 61, y: 6.73, label: 'Canada', color: colors.namerica, region: 'namerica'},
+  {x: 76, y: 6.73, label: 'USA', color: colors.namerica, region: 'namerica'},
+  
+  // East Asia (ink-mid)
+  {x: 49, y: 6.04, label: 'Japan', color: colors.eastasia, region: 'eastasia'},
+  {x: 52, y: 6.08, label: 'S. Korea', color: colors.eastasia, region: 'eastasia'},
+  {x: 82, y: 6.45, label: 'Singapore', color: colors.eastasia, region: 'eastasia'},
+  {x: 34, y: 5.74, label: 'China', color: colors.eastasia, region: 'eastasia'},
+  {x: 55, y: 5.92, label: 'Israel', color: colors.eastasia, region: 'eastasia'},
+  
+  // Gulf (pink/red)
+  {x: 114, y: 6.58, label: 'Qatar', color: colors.gulf, region: 'gulf'},
+  {x: 88, y: 6.37, label: 'UAE', color: colors.gulf, region: 'gulf'},
+  {x: 52, y: 6.19, label: 'Kuwait', color: colors.gulf, region: 'gulf'},
+  {x: 58, y: 6.10, label: 'Saudi Arabia', color: colors.gulf, region: 'gulf'}
+];
+
+const ctx1 = document.getElementById('happinessGdpChart');
+if (ctx1) {
+  new Chart(ctx1, {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        label: 'All Countries',
+        data: happinessData,
+        backgroundColor: happinessData.map(d => d.color),
+        borderColor: happinessData.map(d => d.color),
+        borderWidth: 2,
+        pointRadius: 6,
+        pointHoverRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const point = context.raw;
+              return `${point.label}: GDP $${point.x}k, Happiness ${point.y}`;
+            }
+          },
+          backgroundColor: 'rgba(26, 26, 24, 0.9)',
+          titleColor: '#fff',
+          bodyColor: '#fff',
+          borderColor: '#d4d0c4',
+          borderWidth: 1,
+          padding: 12,
+          displayColors: false
+        }
+      },
+      scales: {
+        x: {
+          type: 'linear',
+          position: 'bottom',
+          title: {
+            display: true,
+            text: 'GDP per capita (USD PPP, thousands)',
+            font: {
+              family: "'JetBrains Mono', monospace",
+              size: 11,
+              weight: '500'
+            },
+            color: '#6b6b62'
+          },
+          min: 30,
+          max: 120,
+          ticks: {
+            font: {
+              family: "'Source Serif 4', serif",
+              size: 11
+            },
+            color: '#6b6b62'
+          },
+          grid: {
+            color: '#d4d0c4',
+            lineWidth: 0.5
+          }
+        },
+        y: {
+          title: {
+            display: true,
+            text: 'Happiness score (0–10)',
+            font: {
+              family: "'JetBrains Mono', monospace",
+              size: 11,
+              weight: '500'
+            },
+            color: '#6b6b62'
+          },
+          min: 5.5,
+          max: 8.0,
+          ticks: {
+            font: {
+              family: "'Source Serif 4', serif",
+              size: 11
+            },
+            color: '#6b6b62'
+          },
+          grid: {
+            color: '#d4d0c4',
+            lineWidth: 0.5
+          }
+        }
+      }
+    },
+    plugins: [{
+      afterDatasetsDraw: function(chart) {
+        const ctx = chart.ctx;
+        ctx.font = "10px 'Source Serif 4', serif";
+        ctx.fillStyle = '#3d3d38';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        
+        chart.data.datasets[0].data.forEach((point, index) => {
+          const meta = chart.getDatasetMeta(0);
+          const element = meta.data[index];
+          const x = element.x;
+          const y = element.y;
+          
+          // Only label key countries to avoid clutter
+          const labeledCountries = ['Qatar', 'Norway', 'Finland', 'Denmark', 'Iceland', 'Sweden', 'UAE', 'Saudi Arabia', 'Kuwait', 'USA', 'Singapore', 'China'];
+          if (labeledCountries.includes(point.label)) {
+            ctx.fillText(point.label, x, y - 8);
+          }
+        });
+      }
+    }]
+  });
+}
+
+// ============================================================================
+// CHART 2: GDP-Adjusted Composite Ranking (Section 6.1)
+// ============================================================================
+const rankingData = [
+  {country: 'Norway', value: 1.09, type: 'socialDem'},
+  {country: 'Denmark', value: 1.03, type: 'socialDem'},
+  {country: 'Iceland', value: 0.95, type: 'socialDem'},
+  {country: 'Sweden', value: 0.90, type: 'socialDem'},
+  {country: 'Finland', value: 0.90, type: 'socialDem'},
+  {country: 'Switzerland', value: 0.77, type: 'liberalDem'},
+  {country: 'Netherlands', value: 0.70, type: 'socialDem'},
+  {country: 'Ireland', value: 0.49, type: 'liberalDem'},
+  {country: 'Germany', value: 0.36, type: 'socialDem'},
+  {country: 'New Zealand', value: 0.35, type: 'liberalDem'},
+  {country: 'Belgium', value: 0.31, type: 'liberalDem'},
+  {country: 'Australia', value: 0.27, type: 'liberalDem'},
+  {country: 'Austria', value: 0.26, type: 'liberalDem'},
+  {country: 'Canada', value: 0.19, type: 'liberalDem'},
+  {country: 'UK', value: 0.18, type: 'liberalDem'},
+  {country: 'Japan', value: 0.09, type: 'liberalDem'},
+  {country: 'France', value: 0.03, type: 'liberalDem'},
+  {country: 'S. Korea', value: -0.01, type: 'flawedDem'},
+  {country: 'Spain', value: -0.04, type: 'flawedDem'},
+  {country: 'Singapore', value: -0.14, type: 'hybrid'},
+  {country: 'Italy', value: -0.22, type: 'flawedDem'},
+  {country: 'Israel', value: -0.39, type: 'flawedDem'},
+  {country: 'USA', value: -0.52, type: 'flawedDem'},
+  {country: 'China', value: -1.71, type: 'oneParty'},
+  {country: 'UAE', value: -0.89, type: 'authoritarian'},
+  {country: 'Qatar', value: -1.41, type: 'authoritarian'},
+  {country: 'Kuwait', value: -1.60, type: 'authoritarian'},
+  {country: 'Saudi Arabia', value: -1.95, type: 'authoritarian'}
+];
+
+// Sort by value descending
+rankingData.sort((a, b) => b.value - a.value);
+
+const govTypeColors = {
+  'socialDem': colors.socialDem,
+  'liberalDem': colors.liberalDem,
+  'flawedDem': colors.flawedDem,
+  'hybrid': colors.hybrid,
+  'authoritarian': colors.authoritarian,
+  'oneParty': colors.oneParty
+};
+
+const ctx2 = document.getElementById('compositeRankingChart');
+if (ctx2) {
+  new Chart(ctx2, {
+    type: 'bar',
+    data: {
+      labels: rankingData.map(d => d.country),
+      datasets: [{
+        label: 'GDP-Adjusted Wellbeing Score',
+        data: rankingData.map(d => d.value),
+        backgroundColor: rankingData.map(d => govTypeColors[d.type]),
+        borderColor: rankingData.map(d => govTypeColors[d.type]),
+        borderWidth: 1
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return `Residual: ${context.parsed.x.toFixed(2)} SD`;
+            }
+          },
+          backgroundColor: 'rgba(26, 26, 24, 0.9)',
+          titleColor: '#fff',
+          bodyColor: '#fff',
+          borderColor: '#d4d0c4',
+          borderWidth: 1,
+          padding: 12
+        }
+      },
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: 'Wellbeing residual (SD above/below GDP prediction)',
+            font: {
+              family: "'JetBrains Mono', monospace",
+              size: 10,
+              weight: '500'
+            },
+            color: '#6b6b62'
+          },
+          min: -2.5,
+          max: 1.5,
+          ticks: {
+            font: {
+              family: "'Source Serif 4', serif",
+              size: 10
+            },
+            color: '#6b6b62'
+          },
+          grid: {
+            color: '#d4d0c4',
+            lineWidth: 0.5,
+            drawBorder: true
+          }
+        },
+        y: {
+          ticks: {
+            font: {
+              family: "'Source Serif 4', serif",
+              size: 11
+            },
+            color: '#1a1a18'
+          },
+          grid: {
+            display: false
+          }
+        }
+      },
+      layout: {
+        padding: {
+          left: 10,
+          right: 20,
+          top: 10,
+          bottom: 10
+        }
+      }
+    }
+  });
+}
+</script>
 
 </body>
 </html>
